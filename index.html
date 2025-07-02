@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متجر AKAL ABDELHAK AMINE</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Tahoma', sans-serif;
+      background-color: #0d0d0d;
+      color: #00ffff;
+    }
+    .centered {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    .section {
+      display: none;
+      padding: 20px;
+    }
+    .section.active {
+      display: block;
+    }
+    h1, h2 {
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+    }
+    .btn {
+      background-color: #111;
+      border: 2px solid #00ffff;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffff55;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background-color: #00ffff;
+      color: #000;
+    }
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .product {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      width: 250px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 0 10px #005577;
+      transition: transform 0.3s ease;
+    }
+    .product:hover {
+      transform: scale(1.05);
+    }
+    .product img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .product h3 {
+      margin: 10px 0 5px;
+      font-size: 18px;
+    }
+    .price {
+      color: #00ffaa;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .quantity-modal, .form-modal, .cart-modal {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background-color: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .modal-content {
+      background-color: #222;
+      padding: 30px;
+      border-radius: 12px;
+      color: #fff;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .quantity-btn {
+      background-color: #00ffaa;
+      color: #000;
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .quantity-btn:hover {
+      background-color: #00ddaa;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+    }
+    .cart-list {
+      text-align: right;
+    }
+    .thankyou-message {
+      color: #00ff88;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="centered" id="welcome">
+    <h1>مرحباً بك في متجر AKAL ABDELHAK AMINE</h1>
+  </div>
+
+  <div class="centered section" id="categorySelect">
+    <h2>ماذا تريد التصفح اليوم؟</h2>
+    <button class="btn" onclick="showSubcategory('ملابس')">🧥 ملابس</button>
+    <button class="btn" onclick="showSubcategory('إلكترونيات')">🎧 إلكترونيات</button>
+    <button class="btn" onclick="showSubcategory('أواني')">🍽️ أواني</button>
+    <button class="btn" onclick="showSubcategory('إكسسوارات')">🕶️ إكسسوارات</button>
+    <button class="btn" onclick="showSubcategory('أغذية')">🛍️ أغذية</button>
+  </div>
+
+  <div class="centered section" id="subcategorySelect"></div>
+  <div class="section" id="productDisplay"></div>
+
+  <div class="quantity-modal" id="quantityModal">
+    <div class="modal-content">
+      <h3>كمية الشراء؟</h3>
+      <div id="quantityButtons"></div>
+      <br>
+      <button class="btn" onclick="closeQuantityModal()">إلغاء</button>
+    </div>
+  </div>
+
+  <div class="cart-modal" id="cartModal">
+    <div class="modal-content">
+      <h3>🛒 قائمة المشتريات</h3>
+      <div class="cart-list" id="cartItems"></div>
+      <div id="cartTotal"></div>
+      <button class="btn" onclick="proceedToCheckout()">إنهاء التسوق</button>
+      <button class="btn" onclick="closeCartModal()">إغلاق</button>
+      <button class="btn" onclick="goBack()">⬅️ رجوع</button>
+    </div>
+  </div>
+
+  <div class="form-modal" id="checkoutForm">
+    <form class="modal-content" action="https://formsubmit.co/akalabdelhakamine38@gmail.com" method="POST">
+      <h3>معلومات الزبون</h3>
+      <input type="text" name="الاسم" placeholder="الاسم الكامل" required>
+      <input type="text" name="اللقب" placeholder="اللقب" required>
+      <input type="tel" name="رقم الهاتف" placeholder="رقم الهاتف" required>
+      <input type="text" name="العنوان" placeholder="العنوان الكامل" required>
+      <input type="hidden" name="products" id="formProducts">
+      <button class="btn" type="submit">تأكيد الطلب</button>
+      <button class="btn" type="button" onclick="closeCheckoutForm()">إلغاء</button>
+    </form>
+  </div>
+
+  <div class="thankyou-message" id="thankYouMessage" style="display:none">
+    ✅ شكراً لك! تم إرسال طلبك بنجاح. سيتم التواصل معك قريباً.
+  </div>
+
+  <!-- الأصوات -->
+  <audio id="buySound" src="sounds/beep-sound-short-237619.mp3"></audio>
+  <audio id="paySound" src="sounds/message-notification-190034.mp3"></audio>
+  <audio id="backSound" src="sounds/click.wav"></audio>
+
+  <script>
+    const welcome = document.getElementById("welcome");
+    const categorySelect = document.getElementById("categorySelect");
+    const subcategorySelect = document.getElementById("subcategorySelect");
+    const productDisplay = document.getElementById("productDisplay");
+    const cartModal = document.getElementById("cartModal");
+    const quantityModal = document.getElementById("quantityModal");
+    const checkoutForm = document.getElementById("checkoutForm");
+    const thankYouMessage = document.getElementById("thankYouMessage");
+    const formProducts = document.getElementById("formProducts");
+
+    let cart = [];
+    let currentProduct = {};
+
+    setTimeout(() => {
+      welcome.style.display = "none";
+      categorySelect.classList.add("active");
+    }, 2500);
+
+    const subcategories = {
+      "ملابس": ["رجال", "نساء", "أطفال"],
+      "إلكترونيات": ["هواتف", "حواسيب", "سماعات"],
+      "أواني": ["مطبخ", "أكواب", "صحون"],
+      "إكسسوارات": ["نظارات", "ساعات", "حقائب"],
+      "أغذية": ["حلويات", "مشروبات", "معلبات"]
+    };
+
+    function showSubcategory(category) {
+      categorySelect.classList.remove("active");
+      subcategorySelect.classList.add("active");
+      subcategorySelect.innerHTML = `<h2>${category}</h2>` + 
+        subcategories[category].map(sub => `<button class="btn" onclick="showProducts('${sub}')">${sub}</button>`).join("") +
+        `<br><button class="btn" onclick="goBack()">⬅️ رجوع</button>`;
+    }
+
+    function showProducts(subcategory) {
+      subcategorySelect.classList.remove("active");
+      productDisplay.classList.add("active");
+      productDisplay.innerHTML = `<h2>${subcategory}</h2><div class="products">` + 
+        Array.from({length:3}).map((_,i) => `
+          <div class="product">
+            <img src="https://via.placeholder.com/250x180?text=${subcategory}+${i+1}" alt="${subcategory}">
+            <h3>${subcategory} ${i+1}</h3>
+            <p>وصف المنتج ${i+1} من قسم ${subcategory}</p>
+            <div class="price">${(i+1)*1000} دج</div>
+            <button class="btn" onclick="openQuantityModal('${subcategory} ${i+1}', ${(i+1)*1000})">أضف إلى السلة</button>
+          </div>
+        `).join("") + `</div><br><button class="btn" onclick="openCart()">عرض السلة</button>
+        <button class="btn" onclick="goBack()">⬅️ رجوع</button>`;
+    }
+
+    function openQuantityModal(name, price) {
+      currentProduct = { name, price };
+      quantityModal.style.display = 'flex';
+      const buttonsContainer = document.getElementById("quantityButtons");
+      buttonsContainer.innerHTML = "";
+      for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement("button");
+        btn.className = "quantity-btn";
+        btn.textContent = i;
+        btn.onclick = () => selectQuantity(i);
+        buttonsContainer.appendChild(btn);
+      }
+    }
+
+    function selectQuantity(qty) {
+      const total = qty * currentProduct.price;
+      cart.push({ ...currentProduct, qty, total });
+      document.getElementById("buySound").play();
+      closeQuantityModal();
+    }
+
+    function closeQuantityModal() {
+      quantityModal.style.display = "none";
+    }
+
+    function openCart() {
+      cartModal.style.display = 'flex';
+      const cartItems = document.getElementById("cartItems");
+      const cartTotal = document.getElementById("cartTotal");
+      cartItems.innerHTML = cart.map(item => `<p>${item.name} × ${item.qty} = ${item.total} دج</p>`).join("");
+      const total = cart.reduce((acc, item) => acc + item.total, 0);
+      cartTotal.innerHTML = `<h4>المجموع الكلي: ${total} دج</h4>`;
+      document.getElementById("paySound").play();
+    }
+
+    function closeCartModal() {
+      cartModal.style.display = "none";
+    }
+
+    function proceedToCheckout() {
+      cartModal.style.display = 'none';
+      checkoutForm.style.display = 'flex';
+      formProducts.value = cart.map(i => `${i.name} × ${i.qty} = ${i.total} دج`).join(" | ");
+    }
+
+    function closeCheckoutForm() {
+      checkoutForm.style.display = 'none';
+    }
+
+    function goBack() {
+      document.getElementById("backSound").play();
+      if (productDisplay.classList.contains("active")) {
+        productDisplay.classList.remove("active");
+        subcategorySelect.classList.add("active");
+      } else if (subcategorySelect.classList.contains("active")) {
+        subcategorySelect.classList.remove("active");
+        categorySelect.classList.add("active");
+      } else {
+        categorySelect.classList.remove("active");
+        welcome.style.display = "flex";
+        setTimeout(() => {
+          welcome.style.display = "none";
+          categorySelect.classList.add("active");
+        }, 2000);
+      }
+    }
+
+    document.querySelector("form").addEventListener("submit", function(e) {
+      setTimeout(() => {
+        checkoutForm.style.display = "none";
+        thankYouMessage.style.display = "block";
+        cart = [];
+      }, 500);
+    });
+  </script>
+</body>
+</html>
